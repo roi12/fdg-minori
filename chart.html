@@ -7,16 +7,21 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <canvas id="myChart" width="400" height="200"></canvas>
+    <div style="max-width: 100%; margin: auto;">
+        <canvas id="myChart"></canvas>
+    </div>
     <script>
         const ctx = document.getElementById('myChart').getContext('2d');
+        const data = [84, 63, 39, 30];
+        const labels = ['Membri della Community', 'Prossimi Incontri', 'Dicci la tua!', 'Condivisione notizie'];
+
         const myChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Membri della Community', 'Prossimi Incontri', 'Dicci la tua!', 'Condivisione notizie'],
+                labels: labels,
                 datasets: [{
                     label: 'Numero di Membri',
-                    data: [84, 63, 39, 30],
+                    data: data,
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',
@@ -34,12 +39,50 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false, // Adatta il grafico alle dimensioni del contenitore
+                plugins: {
+                    tooltip: {
+                        enabled: true
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    // Plugin per mostrare i totali sopra le barre
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value) => value
+                    }
+                },
                 scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 45, // Rotazione etichette sull'asse X per spazi stretti
+                            minRotation: 0
+                        }
+                    },
                     y: {
                         beginAtZero: true
                     }
                 }
-            }
+            },
+            plugins: [{
+                id: 'totals',
+                afterDatasetsDraw: (chart) => {
+                    const {ctx, data, scales} = chart;
+                    ctx.save();
+                    ctx.font = '14px Arial';
+                    ctx.fillStyle = 'black';
+                    ctx.textAlign = 'center';
+                    data.datasets[0].data.forEach((value, index) => {
+                        const barX = scales.x.getPixelForValue(index);
+                        const barY = scales.y.getPixelForValue(value);
+                        ctx.fillText(value, barX, barY - 10); // Posiziona il totale sopra la barra
+                    });
+                    ctx.restore();
+                }
+            }]
         });
     </script>
 </body>
